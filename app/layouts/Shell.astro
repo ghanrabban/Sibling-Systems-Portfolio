@@ -40,12 +40,12 @@ const active = (path: string) =>
   path ? Astro.url.pathname.startsWith(pageUrl(lang, path)) : Astro.url.pathname === pageUrl(lang);
 ---
 
-<BaseLayout htmlLang={lang} palette="green-soft">
+<BaseLayout htmlLang={lang} palette="monochrome">
   <Fragment slot="head">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#fdfdf9" />
+    <meta name="theme-color" content="#ffffff" data-light="#ffffff" data-dark="#222222" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     {(site.placeholderMode || noindex) && <meta name="robots" content="noindex, follow" />}
@@ -93,6 +93,8 @@ const active = (path: string) =>
           ? preference === 'dark'
           : matchMedia('(prefers-color-scheme: dark)').matches;
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        const themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.content = themeColor.dataset[dark ? 'dark' : 'light'];
         document.documentElement.classList.add('js');
       })();
     </script>
@@ -177,7 +179,7 @@ const active = (path: string) =>
       <div>
         <a class="footer-brand" href={pageUrl(lang)}><Mark size={24} /> Sibsys</a><p>
           {t.colophon}
-        </p><small>{t.inspired}</small>
+        </p>
       </div>
       <div class="footer-links">
         <a href={site.repository}><Github size={16} />{t.source}<ArrowUpRight size={12} /></a><a

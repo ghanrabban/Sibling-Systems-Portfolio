@@ -3,6 +3,8 @@ const toggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
 toggle?.addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
+  const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (themeColor) themeColor.content = themeColor.dataset[next]!;
   try {
     localStorage.setItem('sibsys-theme', next);
   } catch {

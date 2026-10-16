@@ -1,6 +1,6 @@
 # Sibsys — Sibling Systems
 
-A quiet home for projects, writing, and ideas in progress. English and Bahasa Indonesia, light/dark themes and local search. Built with Astro, inspired by [Navfolio](https://github.com/dodolalorc/astro-navfolio), for **https://sibsys.dev**.
+A quiet home for projects, writing, and ideas in progress. English and Bahasa Indonesia, monochrome light/charcoal dark themes and local search. Built with Astro for **https://sibsys.dev**.
 
 This first version contains **clearly labeled placeholder content**, as requested. Search engines are asked not to index it until `placeholderMode` is turned off after editorial review. This is a publishing preference, not access control: public files and Git history remain readable.
 
@@ -48,7 +48,7 @@ Read the [author guide](docs/author-guide.md), [operations guide](docs/operation
 
 Upstream Navfolio history and its MIT notice are retained. Legacy `src/` (except `src/lib/` and the Markdown plugin adapter), `public/`, old scripts and the optional `src/docs` submodule are reference material. **Edit the `app/` paths above.** A normal clone is sufficient; initializing the reference docs submodule is unnecessary. Rebuild the original reference only from audited commit `70aa71ddd9f7ee4af38fa5810b320820712f1885` in a separate checkout.
 
-The Docker image digest, Bun version and `bun.lock` pin build inputs. Sibsys uses Navfolio's neutral base layout, palettes and Markdown integration, with application-owned EN/ID routing; no private package forks are required. See [third-party notices](docs/third-party-notices.md).
+The Docker image digest, Bun version and `bun.lock` pin build inputs. Sibsys owns its EN/ID routing and monochrome palettes; no private package forks are required.
 
 ## Source and deployment
 
@@ -57,3 +57,7 @@ Source: [ghanrabban/Sibling-Systems-Portfolio](https://github.com/ghanrabban/Sib
 GitHub publication and Cloudflare deployment are separate. The inherited Pages/review workflows were removed; pushes do not automatically deploy or send source to a review provider. Keep confidential drafts outside this public repository.
 
 The intended Worker is `sibsys-portfolio`. Verify the account and existing custom-domain binding before deployment. Configuration intentionally does not replace an unknown domain association. Follow the operations guide to upload the reviewed static artifact and connect `sibsys.dev`.
+
+## Acknowledgment
+
+Inspired by [Navfolio](https://github.com/dodolalorc/astro-navfolio). Sibsys retains its neutral base layout and Markdown integration. The original MIT copyright/permission notice and applicable package/font/icon licenses remain included; see [LICENSE](LICENSE) and [third-party notices](docs/third-party-notices.md). This acknowledgment is shown here rather than in the website interface.

@@ -1,10 +1,10 @@
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
-import { defineEcConfig, setAlpha } from 'astro-expressive-code';
+import { defineEcConfig } from 'astro-expressive-code';
 
 const code = {
-  lightTheme: 'github-light',
-  darkTheme: 'github-dark',
+  lightTheme: 'sibsys-light',
+  darkTheme: 'sibsys-dark',
   lineNumbers: true,
   wrap: true,
   preserveIndent: true,
@@ -12,11 +12,34 @@ const code = {
 };
 
 const isDarkCodeTheme = ({ theme }) => theme.name === code.darkTheme;
+const monochromeTheme = (name, type, background, foreground, muted) => ({
+  name,
+  type,
+  colors: {
+    'editor.background': background,
+    'editor.foreground': foreground,
+    'editorLineNumber.foreground': muted,
+    'editorLineNumber.activeForeground': foreground,
+  },
+  tokenColors: [
+    {
+      scope: ['comment', 'punctuation.definition.comment'],
+      settings: { foreground: muted, fontStyle: 'italic' },
+    },
+    {
+      scope: ['keyword', 'storage', 'entity.name.function', 'support.function'],
+      settings: { foreground, fontStyle: 'bold' },
+    },
+  ],
+});
 
 export default defineEcConfig({
   plugins: [pluginLineNumbers(), pluginCollapsibleSections()],
   defaultLocale: 'en',
-  themes: [code.lightTheme, code.darkTheme],
+  themes: [
+    monochromeTheme(code.lightTheme, 'light', '#f5f5f5', '#111111', '#595959'),
+    monochromeTheme(code.darkTheme, 'dark', '#303030', '#e2e2e2', '#b5b5b5'),
+  ],
   themeCssRoot: ':root',
   themeCssSelector: (theme) =>
     theme.name === code.darkTheme ? '[data-theme="dark"]' : '[data-theme="light"]',
@@ -35,47 +58,43 @@ export default defineEcConfig({
   styleOverrides: {
     borderRadius: '1px',
     borderWidth: '1px',
-    borderColor: 'var(--paper-line-strong)',
-    uiFontFamily: 'var(--font-meta)',
+    borderColor: 'var(--line)',
+    uiFontFamily: 'var(--font)',
     uiFontSize: '0.88rem',
-    codeFontFamily: 'var(--font-code)',
+    codeFontFamily: 'var(--font)',
     codeFontSize: '0.9rem',
     codeLineHeight: '1.65',
     codePaddingBlock: '1rem',
     codePaddingInline: '1.15rem',
-    codeBackground: 'var(--paper-surface-muted)',
+    codeBackground: 'var(--wash)',
     frames: {
-      editorActiveTabBackground: 'var(--paper-surface-muted)',
-      editorActiveTabIndicatorTopColor: 'var(--paper-accent)',
-      editorTabBarBackground: 'var(--paper-control)',
-      editorBackground: 'var(--paper-surface-muted)',
-      frameBoxShadowCssValue: 'var(--paper-shadow)',
+      editorActiveTabBackground: 'var(--wash)',
+      editorActiveTabIndicatorTopColor: 'var(--accent)',
+      editorTabBarBackground: 'var(--surface)',
+      editorBackground: 'var(--wash)',
+      frameBoxShadowCssValue: 'none',
       inlineButtonBackgroundActiveOpacity: '0.16',
       inlineButtonBackgroundHoverOrFocusOpacity: '0.1',
-      terminalTitlebarBackground: 'var(--paper-control)',
-      terminalBackground: 'var(--paper-surface-muted)',
-      tooltipSuccessBackground: ({ theme }) =>
-        setAlpha(theme.colors['terminal.ansiGreen'] || '#3f8f58', 0.94),
+      terminalTitlebarBackground: 'var(--surface)',
+      terminalBackground: 'var(--wash)',
+      tooltipSuccessBackground: 'var(--ink)',
     },
     textMarkers: {
       lineMarkerAccentWidth: '0.2rem',
       backgroundOpacity: '0.24',
       borderOpacity: '0.62',
       markBackground: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(120, 151, 255, 0.26)' : 'rgba(82, 111, 190, 0.14)',
-      markBorderColor: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(168, 188, 255, 0.74)' : 'rgba(82, 111, 190, 0.38)',
+        isDarkCodeTheme(context) ? 'rgba(220, 220, 220, 0.12)' : 'rgba(0, 0, 0, 0.06)',
+      markBorderColor: (context) => (isDarkCodeTheme(context) ? '#b5b5b5' : '#595959'),
       insBackground: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(82, 164, 112, 0.24)' : 'rgba(62, 138, 86, 0.13)',
-      insBorderColor: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(133, 205, 156, 0.68)' : 'rgba(62, 138, 86, 0.36)',
+        isDarkCodeTheme(context) ? 'rgba(220, 220, 220, 0.10)' : 'rgba(0, 0, 0, 0.05)',
+      insBorderColor: (context) => (isDarkCodeTheme(context) ? '#b5b5b5' : '#595959'),
       delBackground: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(207, 96, 86, 0.22)' : 'rgba(184, 74, 65, 0.12)',
-      delBorderColor: (context) =>
-        isDarkCodeTheme(context) ? 'rgba(238, 147, 137, 0.64)' : 'rgba(184, 74, 65, 0.34)',
+        isDarkCodeTheme(context) ? 'rgba(220, 220, 220, 0.06)' : 'rgba(0, 0, 0, 0.03)',
+      delBorderColor: (context) => (isDarkCodeTheme(context) ? '#b5b5b5' : '#595959'),
     },
     collapsibleSections: {
-      closedBackgroundColor: 'var(--paper-control)',
+      closedBackgroundColor: 'var(--surface)',
     },
   },
 });

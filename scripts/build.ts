@@ -11,7 +11,8 @@ async function run(command: string[]) {
   });
   if (await child.exited) throw new Error(`Build step failed: ${command.join(' ')}`);
 }
-await run(['node', 'node_modules/astro/bin/astro.mjs', 'build']);
+// Content caches can retain stylesheet URLs from an earlier Markdown theme.
+await run(['node', 'node_modules/astro/bin/astro.mjs', 'build', '--force']);
 for (const lang of ['en', 'id']) await cp(`dist/${lang}/404/index.html`, `dist/${lang}/404.html`);
 if (site.placeholderMode) {
   const headers = await readFile('dist/_headers', 'utf8');
