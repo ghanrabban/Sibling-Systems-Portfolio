@@ -13,7 +13,7 @@ Started 2026-10-13, following master plan revision 3. Product: **Sibsys — Sibl
 
 ## Evidence status
 
-Implementation is in progress. Build, browser, accessibility, deployment, owner acceptance and recovery results will be recorded here as executed. An unexecuted check is not a pass.
+The placeholder implementation and local automated checks are complete. Results and pending owner, manual-accessibility, deployment and recovery checks are recorded below. An unexecuted check is not a pass.
 
 ## Reference verification and scoped architecture decision
 
@@ -40,3 +40,15 @@ Performance lab: Chromium 156.0.8078.4, Linux arm64, 390×844, cold contexts/cac
 Workers configuration is static-only. Local checks establish behavior and asset capacity, not account entitlement. Wrangler `whoami` reports no authentication; the actual account/plan, hosted preview, domain binding, deployment identity and remote rollback are unverified. No Cloudflare site or DNS record has been changed.
 
 Still required for full G4/G5 acceptance: owner content/style review and author/Git walkthrough; screen-reader and real Safari/device checks; long real-content stress cases; account-authenticated hosted smoke tests and timed rollback. Source publication, clean public clone build and final Docker export status are recorded below as they execute. The plan's 0/1/6/7/12/13 pagination matrix is only partially covered by the current integration fixture; no blanket pass is claimed.
+
+## Source and local release handoff
+
+Implementation commit `2dd4b5216178ec00c6224d4d8f66923d5c382b4d` was pushed to the owner's `main` branch. An unauthenticated, shallow public clone succeeded and its Docker build completed without initializing the reference docs submodule. The fresh clone used cached Docker dependency layers; a separate cold frozen install had already succeeded with 726 packages. No private dependency or maintainer-only source was required.
+
+The exported release and the fresh-clone build matched all 94 file checksums (92 assets plus `_headers` and `_redirects`). The SHA-256 of the sorted path-to-file-hash mapping is `9723d6d4ca0999b0a28bc7d738e296db0dc3c0984a5be5ab864567c97d868a73`. Assets total 1,733,684 bytes; the largest is 175,488 bytes. These two measured outputs are byte-identical; this does not establish byte-identical Docker images or every future build.
+
+A subsequent export verification preserved every non-search file checksum but changed Pagefind's generated index/metadata bytes and names. Both indexes still report six English and five Indonesian entries. Therefore builds are functionally reproducible, not guaranteed byte-identical; retain the specific reviewed artifact and its own asset report for deployment and recovery.
+
+Docker Compose editing and Wrangler preview both started successfully on loopback. A temporary bind-mounted edit appeared in the editing service and was restored immediately. An isolated export test verified that the active release no longer contains a withdrawn page while the old artifact remains retained. The export now saves its matching Wrangler configuration and records actual Node version, lockfile hash and configuration hash. Wrangler's upload dry run passed with no configured application bindings. A dry run is not a deployment.
+
+The final source tag is `v0.1.0-preview.1`; it denotes a placeholder preview, not production acceptance. The local runtime/output is ready for owner review. G2's bilingual slice is implemented and tested; G3's placeholder presentation is delivered under the owner's scope change. G4/G5 remain open for the specifically listed manual/owner/hosted checks. The retained Markdown adapter still produces an Astro deprecation notice; migrate that adapter before a future incompatible framework upgrade.

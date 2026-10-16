@@ -10,6 +10,7 @@ const previous = await lstat(current).catch(() => undefined);
 if (previous && !previous.isSymbolicLink())
   throw new Error('Refusing to replace an existing non-symlink output/current');
 await cp('dist', path.join(output, name, 'dist'), { recursive: true });
+await cp('wrangler.jsonc', path.join(output, name, 'wrangler.jsonc'));
 for (const file of ['build-inputs.json', 'asset-report.json'])
   await cp(`releases/${file}`, path.join(output, name, file));
 const next = path.join(output, `.next-${name}`);
