@@ -1,0 +1,77 @@
+---
+import { ArrowUpRight, ArrowRight, Github, Rss } from 'lucide-astro';
+import { site } from '../config/site';
+import { ui } from '../lib/i18n';
+import { entries, pageUrl, type Locale } from '../lib/content';
+import Mark from './Mark.astro';
+import PostList from './PostList.astro';
+import ProjectGrid from './ProjectGrid.astro';
+const { lang } = Astro.props as { lang: Locale };
+const t = ui(lang);
+const posts = await entries('blog', lang);
+const projects = await entries('projects', lang);
+const featured = projects.filter((project) => project.data.featured);
+---
+
+<main class="shell home-grid" id="main">
+  <div class="home-main">
+    <section class="intro">
+      <p class="eyebrow">Sibling Systems / Sibsys</p>
+      <h1>{site[lang].introduction}</h1>
+      <p class="lede">{site[lang].bio}</p>
+      <div class="intro-links">
+        <a class="button button-primary" href={pageUrl(lang, 'projects')}
+          >{t.selected}<ArrowUpRight size={15} /></a
+        ><a class="button" href={pageUrl(lang, 'about')}>{t.about} Sibsys<ArrowRight size={15} /></a
+        >
+      </div>
+    </section>
+    <section class="section" aria-labelledby="selected-work">
+      <div class="section-heading">
+        <h2 id="selected-work">{t.selected}</h2><a
+          class="text-link"
+          href={pageUrl(lang, 'projects')}>{t.allProjects}<ArrowUpRight size={13} /></a
+        >
+      </div><ProjectGrid
+        projects={(featured.length ? featured : projects).slice(0, 2)}
+        lang={lang}
+      />
+    </section>
+    <section class="section" aria-labelledby="recent-writing">
+      <div class="section-heading">
+        <h2 id="recent-writing">{t.latest}</h2><a class="text-link" href={pageUrl(lang, 'blog')}
+          >{t.allWriting}<ArrowUpRight size={13} /></a
+        >
+      </div><PostList posts={posts.slice(0, 3)} lang={lang} />
+    </section>
+    {
+      site.placeholderMode && (
+        <p class="starter-note">
+          <span />
+          {t.example} · {t.placeholder}
+        </p>
+      )
+    }
+  </div>
+  <aside class="home-side" aria-label="Sibling Systems">
+    <section class="profile-panel">
+      <div class="profile-art"><Mark size={86} /></div><div class="profile-copy">
+        <h2>Sibling Systems</h2><p>
+          {
+            lang === 'en'
+              ? 'A shared space for curious minds.'
+              : 'Ruang bersama untuk rasa ingin tahu.'
+          }
+        </p><a class="profile-link" href={pageUrl(lang, 'about')}
+          >{t.about} Sibsys<ArrowUpRight size={14} /></a
+        >
+      </div>
+    </section>
+    <section class="side-note"><h2>{t.currently}</h2><p>{site[lang].focus}</p></section>
+    <section class="side-note">
+      <h2>{t.elsewhere}</h2><a href={site.repository}><span>GitHub</span><Github size={15} /></a><a
+        href={`/${lang}/rss.xml`}><span>{t.rss}</span><Rss size={14} /></a
+      >
+    </section>
+  </aside>
+</main>

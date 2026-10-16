@@ -1,0 +1,19 @@
+.git
+.github
+node_modules
+dist
+.astro
+.env*
+!.env.example
+.wrangler
+.DS_Store
+coverage
+test-results
+playwright-report
+releases
+src/docs
+*.log
+
+# Legacy demo media is never a Sibsys build input
+public/
+homepage.png

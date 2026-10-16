@@ -1,0 +1,9 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "app/**/*", "src/lib/**/*", "navfolio.config.ts"],
+  "exclude": ["dist", "src/docs", "node_modules"],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "types": ["bun", "astro/client"]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "sibsys-portfolio",
+  "type": "module",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "bun scripts/build.ts",
+    "preview": "wrangler dev --local --ip 0.0.0.0 --port 8787",
+    "check": "astro check",
+    "test": "bun test src/lib",
+    "test:browser": "playwright test tests/portfolio.spec.ts",
+    "test:publication": "bun scripts/verify-publication.ts",
+    "audit:output": "bun scripts/audit.ts",
+    "deploy:check": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy",
+    "format": "prettier --write app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
+    "format:check": "prettier --check app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
+    "test:performance": "playwright test tests/performance.spec.ts --workers=1 --output=test-results/performance"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^7.0.8",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@expressive-code/plugin-collapsible-sections": "^0.44.2",
+    "@expressive-code/plugin-line-numbers": "^0.44.2",
+    "@fontsource/maple-mono": "^5.3.0",
+    "@navfolio/core": "github:navfolio/core#1e7954f",
+    "@navfolio/mdx-components": "github:navfolio/mdx-components#b1d864a",
+    "@navfolio/pages": "github:navfolio/pages#cd6e6fc",
+    "@navfolio/plugin-markdown": "github:navfolio/plugin-markdown#dfba520",
+    "@navfolio/theme-default": "github:navfolio/theme-default#0be2d98",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.4.0",
+    "astro-expressive-code": "^0.44.2",
+    "date-fns": "^4.4.0",
+    "github-slugger": "^2.0.0",
+    "katex": "^0.16.47",
+    "lucide-astro": "^0.556.0",
+    "mermaid": "^11.17.2",
+    "sharp": "^0.35.5",
+    "smol-toml": "^1.9.1",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@astrojs/compiler": "^4.0.0",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "@types/bun": "1.4.3",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "pagefind": "^1.5.2",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^0.14.1",
+    "typescript": "^6.0.3",
+    "wrangler": "4.149.0"
+  },
+  "private": true,
+  "overrides": {
+    "@xmldom/xmldom": "0.9.12",
+    "postcss-selector-parser": "7.1.6",
+    "katex": "0.18.2"
+  }
+}

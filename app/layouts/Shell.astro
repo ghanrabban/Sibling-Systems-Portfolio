@@ -1,0 +1,222 @@
+---
+import BaseLayout from '@navfolio/theme-default/components/BaseLayout.astro';
+import { Search, Moon, Sun, Menu, X, ArrowUpRight, Github, Rss } from 'lucide-astro';
+import Mark from '../components/Mark.astro';
+import { site } from '../config/site';
+import { ui } from '../lib/i18n';
+import { buildDate, pageUrl, type Locale } from '../lib/content';
+import '../styles/sibsys.css';
+interface Props {
+  lang: Locale;
+  title?: string;
+  description?: string;
+  alternate?: string;
+  noTranslation?: boolean;
+  noindex?: boolean;
+  image?: string;
+  article?: boolean;
+}
+const {
+  lang,
+  title,
+  description = site[Astro.props.lang].description,
+  alternate,
+  noTranslation = false,
+  noindex = false,
+  image = site.socialImage,
+  article = false,
+} = Astro.props;
+const t = ui(lang);
+const other = lang === 'en' ? 'id' : 'en';
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.fullName}`;
+const navigation = [
+  ['', t.home],
+  ['blog', t.writing],
+  ['projects', t.projects],
+  ['about', t.about],
+];
+const active = (path: string) =>
+  path ? Astro.url.pathname.startsWith(pageUrl(lang, path)) : Astro.url.pathname === pageUrl(lang);
+---
+
+<BaseLayout htmlLang={lang} palette="green-soft">
+  <Fragment slot="head">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fdfdf9" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {(site.placeholderMode || noindex) && <meta name="robots" content="noindex, follow" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {
+      alternate && (
+        <>
+          <>
+            <link rel="alternate" hreflang={lang} href={canonical} />
+            <link rel="alternate" hreflang={other} href={new URL(alternate, site.url).href} />
+          </>
+        </>
+      )
+    }
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} (${lang})`}
+      href={pageUrl(lang, 'rss.xml').replace(/\/$/, '')}
+    />
+    <meta property="og:title" content={pageTitle} /><meta
+      property="og:description"
+      content={description}
+    />
+    <meta property="og:type" content={article ? 'article' : 'website'} />{
+      !noindex && <meta property="og:url" content={canonical} />
+    }
+    <meta property="og:site_name" content={site.name} /><meta
+      property="og:locale"
+      content={lang === 'id' ? 'id_ID' : 'en_US'}
+    />
+    <meta property="og:image" content={new URL(image, site.url).href} /><meta
+      property="og:image:alt"
+      content="Sibsys — Sibling Systems"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline>
+      (() => {
+        let preference;
+        try {
+          preference = localStorage.getItem('sibsys-theme');
+        } catch {}
+        const dark = preference
+          ? preference === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.classList.add('js');
+      })();
+    </script>
+  </Fragment>
+  <Fragment slot="navigation">
+    <span id="top"></span>
+    <a class="skip-link" href="#main">{t.skip}</a>
+    <header class="topbar" data-pagefind-ignore>
+      <a class="brand" href={pageUrl(lang)} aria-label={`${site.name} — ${t.home}`}
+        ><Mark /><span>Sibsys<span class="brand-dot">.</span></span></a
+      >
+      <nav class="desktop-nav" aria-label={t.navigation}>
+        {
+          navigation.map(([path, label]) => (
+            <a href={pageUrl(lang, path)} aria-current={active(path) ? 'page' : undefined}>
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="nav-actions">
+        <a
+          class="language-link"
+          href={alternate ?? pageUrl(other, 'blog')}
+          lang={other}
+          title={alternate ? t.otherLanguage : t.otherArchive}
+          aria-label={alternate ? t.otherLanguage : t.otherArchive}>{other.toUpperCase()}</a
+        >
+        <button
+          class="icon-button search-trigger js-only"
+          type="button"
+          aria-label={t.search}
+          title={`${t.search} (⌘K / Ctrl+K)`}><Search size={18} /></button
+        >
+        <button
+          class="icon-button js-only"
+          id="theme-toggle"
+          type="button"
+          aria-label={t.theme}
+          title={t.theme}><Moon class="moon" size={18} /><Sun class="sun" size={18} /></button
+        >
+        <button
+          class="icon-button mobile-toggle js-only"
+          id="menu-toggle"
+          type="button"
+          aria-label={t.openMenu}
+          aria-controls="mobile-nav"
+          aria-expanded="false"><Menu size={19} /></button
+        >
+      </div>
+      <nav id="mobile-nav" class="mobile-nav" aria-label={t.navigation} hidden>
+        {
+          navigation.map(([path, label]) => (
+            <a href={pageUrl(lang, path)} aria-current={active(path) ? 'page' : undefined}>
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+    </header>
+    <noscript
+      ><nav class="nojs-nav" aria-label={t.navigation}>
+        {navigation.map(([path, label]) => <a href={pageUrl(lang, path)}>{label}</a>)}
+      </nav></noscript
+    >
+  </Fragment>
+  {
+    noTranslation && (
+      <div class="translation-notice">
+        <>
+          <span>{t.missing}</span>
+          <a href={pageUrl(other, 'blog')}>
+            {t.otherArchive} <ArrowUpRight size={14} />
+          </a>
+        </>
+      </div>
+    )
+  }
+  <slot />
+  <Fragment slot="after-content">
+    <footer class="site-footer" data-pagefind-ignore>
+      <div>
+        <a class="footer-brand" href={pageUrl(lang)}><Mark size={24} /> Sibsys</a><p>
+          {t.colophon}
+        </p><small>{t.inspired}</small>
+      </div>
+      <div class="footer-links">
+        <a href={site.repository}><Github size={16} />{t.source}<ArrowUpRight size={12} /></a><a
+          href={`/${lang}/rss.xml`}><Rss size={16} />RSS</a
+        ><a href="#top">↑ {t.top}</a>
+      </div>
+      <span class="footer-end">Sibling Systems · {buildDate().slice(0, 4)}</span>
+    </footer>
+    <dialog
+      id="search-dialog"
+      aria-labelledby="search-title"
+      data-idle={t.idle}
+      data-loading={t.loading}
+      data-empty={t.empty}
+      data-error={t.error}
+      data-results={t.results}
+      data-lang={lang}
+    >
+      <div class="search-heading">
+        <h2 id="search-title">{t.searchTitle}</h2><button
+          class="icon-button"
+          id="search-close"
+          aria-label={t.close}
+          type="button"><X size={20} /></button
+        >
+      </div>
+      <label class="sr-only" for="search-input">{t.search}</label><input
+        id="search-input"
+        type="search"
+        placeholder={t.searchHint}
+        autocomplete="off"
+      />
+      <p id="search-status" role="status" aria-live="polite">{t.idle}</p><ul id="search-results">
+      </ul>
+      <div class="search-footer">
+        <a href={pageUrl(lang, 'blog')}>{t.allWriting}</a><span><kbd>esc</kbd> {t.close}</span>
+      </div>
+    </dialog>
+    <noscript><p class="noscript-note">{t.noJs}</p></noscript>
+    <script src="../scripts/interactions.ts"></script>
+  </Fragment>
+</BaseLayout>
