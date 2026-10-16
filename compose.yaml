@@ -1,0 +1,37 @@
+name: sibsys
+services:
+  dev:
+    build:
+      context: .
+      target: development
+    ports:
+      - '127.0.0.1:4321:4321'
+    volumes:
+      - ./app:/app/app
+      - ./static:/app/static
+      - ./src/lib:/app/src/lib
+    environment:
+      ASTRO_TELEMETRY_DISABLED: '1'
+  build:
+    build:
+      context: .
+      target: source
+    environment:
+      SOURCE_COMMIT: ${SOURCE_COMMIT:-working-tree}
+    volumes:
+      - ./releases:/output
+    command: ['sh', '-c', 'bun run build && bun scripts/export-release.ts /output']
+  preview:
+    build:
+      context: .
+      target: preview
+    ports:
+      - '127.0.0.1:8787:8787'
+  qa:
+    profiles: ['test']
+    build:
+      context: .
+      target: qa
+    volumes:
+      - ./test-results:/app/test-results
+    command: ['sh', '-c', 'bun run test && bun run check && bun run build && bun run test:browser']

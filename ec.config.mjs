@@ -1,10 +1,6 @@
-import fs from 'node:fs';
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections';
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers';
 import { defineEcConfig, setAlpha } from 'astro-expressive-code';
-import { parse } from 'smol-toml';
-
-const siteToml = parse(fs.readFileSync(new URL('./src/config/site.toml', import.meta.url), 'utf8'));
 
 const code = {
   lightTheme: 'github-light',
@@ -13,14 +9,13 @@ const code = {
   wrap: true,
   preserveIndent: true,
   collapseStyle: 'collapsible-auto',
-  ...(siteToml.config?.code ?? {}),
 };
 
 const isDarkCodeTheme = ({ theme }) => theme.name === code.darkTheme;
 
 export default defineEcConfig({
   plugins: [pluginLineNumbers(), pluginCollapsibleSections()],
-  defaultLocale: 'zh-CN',
+  defaultLocale: 'en',
   themes: [code.lightTheme, code.darkTheme],
   themeCssRoot: ':root',
   themeCssSelector: (theme) =>
@@ -35,6 +30,7 @@ export default defineEcConfig({
   },
   frames: {
     extractFileNameFromCode: true,
+    showCopyToClipboardButton: false,
   },
   styleOverrides: {
     borderRadius: '1px',

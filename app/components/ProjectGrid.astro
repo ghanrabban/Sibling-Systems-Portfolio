@@ -1,0 +1,58 @@
+---
+import { publicationUrl, type Entry, type Locale } from '../lib/content';
+import { ui } from '../lib/i18n';
+interface Props {
+  projects: Entry[];
+  lang: Locale;
+}
+const { projects, lang } = Astro.props;
+const t = ui(lang);
+---
+
+<div class="project-grid">
+  {
+    projects.length ? (
+      projects.map((project, index) => (
+        <article class="project-card">
+          <a
+            class="project-art-link"
+            href={publicationUrl(project)}
+            aria-label={`${t.viewProject}: ${project.data.title}`}
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class:list={['project-art', { 'project-art-alt': index % 2 }]}>
+              {project.data.image ? (
+                <img src={project.data.image} alt="" width="640" height="360" loading="lazy" />
+              ) : (
+                <svg width="240" height="140" viewBox="0 0 240 140" fill="none" aria-hidden="true">
+                  <rect x="48" y="26" width="78" height="78" rx="12" />
+                  <rect x="106" y="40" width="78" height="78" rx="12" />
+                  <path d="M78 65h28m28 28h20M92 51v28m28 0v28" />
+                </svg>
+              )}
+              <span class="art-number">0{index + 1} / SIBSYS</span>
+            </div>
+          </a>
+          <div class="project-card-copy">
+            <div class="meta">{project.data.example ? t.example : project.data.status}</div>
+            <h3>
+              <a href={publicationUrl(project)}>
+                {project.data.title}
+                <span aria-hidden="true">↗</span>
+              </a>
+            </h3>
+            <p>{project.data.description}</p>
+            <div class="tag-row">
+              {project.data.tags.slice(0, 3).map((tag) => (
+                <span>{tag}</span>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))
+    ) : (
+      <p class="empty-state">{t.emptyProjects}</p>
+    )
+  }
+</div>

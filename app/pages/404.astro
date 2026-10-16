@@ -1,0 +1,14 @@
+---
+import Shell from '../layouts/Shell.astro';
+import { ui } from '../lib/i18n';
+const t = ui('en');
+---
+
+<Shell lang="en" title="404" noindex
+  ><main class="shell not-found" id="main">
+    <p class="eyebrow">404 / Sibsys</p><h1>{t.notFound}</h1><p>{t.notFoundText}</p><a
+      class="button"
+      href="/en/">{t.goHome} ↗</a
+    ><a class="button" href="/id/" lang="id">Beranda ↗</a>
+  </main></Shell
+>

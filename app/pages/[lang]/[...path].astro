@@ -1,0 +1,337 @@
+---
+import { render } from 'astro:content';
+import Shell from '../../layouts/Shell.astro';
+import Home from '../../components/Home.astro';
+import PostList from '../../components/PostList.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
+import { site } from '../../config/site';
+import { ui } from '../../lib/i18n';
+import {
+  entries,
+  entrySlug,
+  counterpart,
+  formatPublicationDate,
+  groupSlug,
+  locales,
+  pageUrl,
+  publicationUrl,
+  readingMinutes,
+  type Locale,
+  type Entry,
+} from '../../lib/content';
+
+type Kind = 'home' | 'writing' | 'projects' | 'article' | 'groups' | 'notfound';
+interface Props {
+  lang: Locale;
+  kind: Kind;
+  posts?: Entry[];
+  post?: Entry;
+  title?: string;
+  alternate?: string;
+  currentPage?: number;
+  totalPages?: number;
+  groups?: { name: string; href: string; count: number }[];
+}
+
+export async function getStaticPaths() {
+  const allPosts = await entries('blog');
+  const allProjects = await entries('projects');
+  const allAbout = await entries('about');
+  const routes: { params: { lang: Locale; path?: string }; props: Props }[] = [];
+  for (const lang of locales) {
+    const other = lang === 'en' ? 'id' : 'en';
+    const posts = allPosts.filter((p) => p.data.lang === lang);
+    const projects = allProjects.filter((p) => p.data.lang === lang);
+    const totalPages = Math.max(1, Math.ceil(posts.length / site.postsPerPage));
+    const otherPages = Math.max(
+      1,
+      Math.ceil(allPosts.filter((p) => p.data.lang === other).length / site.postsPerPage),
+    );
+    const add = (path: string | undefined, props: Omit<Props, 'lang'>) =>
+      routes.push({ params: { lang, path }, props: { lang, ...props } });
+    add(undefined, { kind: 'home', alternate: pageUrl(other) });
+    add('projects', { kind: 'projects', posts: projects, alternate: pageUrl(other, 'projects') });
+    add('404', { kind: 'notfound' });
+    for (let page = 1; page <= totalPages; page++) {
+      const path = page === 1 ? 'blog' : `blog/page/${page}`;
+      add(path, {
+        kind: 'writing',
+        posts: posts.slice((page - 1) * site.postsPerPage, page * site.postsPerPage),
+        currentPage: page,
+        totalPages,
+        alternate: page <= otherPages ? pageUrl(other, path) : undefined,
+      });
+    }
+    for (const post of [...posts, ...projects, ...allAbout.filter((p) => p.data.lang === lang)]) {
+      const peer = counterpart(post, [...allPosts, ...allProjects, ...allAbout], other);
+      const path =
+        post.collection === 'about'
+          ? 'about'
+          : `${post.collection === 'blog' ? 'blog' : 'projects'}/${entrySlug(post)}`;
+      add(path, { kind: 'article', post, alternate: peer ? publicationUrl(peer) : undefined });
+    }
+    for (const group of ['tags', 'categories', 'series', 'archives'] as const) {
+      const groups = new Map<string, Entry[]>();
+      for (const post of posts) {
+        const labels =
+          group === 'archives' ? [String(post.data.date.getUTCFullYear())] : post.data[group];
+        for (const name of labels) groups.set(name, [...(groups.get(name) ?? []), post]);
+      }
+      const seen = new Set<string>();
+      const listing = [...groups.entries()]
+        .sort(([a], [b]) => a.localeCompare(b, lang))
+        .map(([name, items]) => {
+          const slug = groupSlug(name);
+          if (!slug || seen.has(slug)) throw new Error(`Ambiguous ${lang}/${group} slug: ${name}`);
+          seen.add(slug);
+          add(`blog/${group}/${slug}`, { kind: 'writing', title: name, posts: items });
+          return { name, href: pageUrl(lang, `blog/${group}/${slug}`), count: items.length };
+        });
+      add(`blog/${group}`, {
+        kind: 'groups',
+        title: ui(lang)[group === 'tags' ? 'topics' : group],
+        groups: listing,
+        alternate: pageUrl(other, `blog/${group}`),
+      });
+    }
+  }
+  const paths = routes.map((r) => `${r.params.lang}/${r.params.path ?? ''}`);
+  if (new Set(paths).size !== paths.length) throw new Error('Duplicate generated route');
+  return routes;
+}
+
+const {
+  lang,
+  kind,
+  post,
+  posts = [],
+  title,
+  alternate,
+  currentPage = 1,
+  totalPages = 1,
+  groups = [],
+} = Astro.props;
+const t = ui(lang);
+const rendered = post ? await render(post) : undefined;
+const Content = rendered?.Content;
+const headings = rendered?.headings.filter((h) => h.depth === 2 || h.depth === 3) ?? [];
+const isProject = post?.collection === 'projects';
+const isAbout = post?.collection === 'about';
+const pageTitle =
+  post?.data.title ??
+  title ??
+  (kind === 'writing'
+    ? t.writing
+    : kind === 'projects'
+      ? t.projects
+      : kind === 'notfound'
+        ? '404'
+        : undefined);
+const related =
+  post?.collection === 'blog'
+    ? (await entries('blog', lang))
+        .filter((p) => p.id !== post.id)
+        .sort(
+          (a, b) =>
+            Number(b.data.tags.some((tag) => post.data.tags.includes(tag))) -
+            Number(a.data.tags.some((tag) => post.data.tags.includes(tag))),
+        )
+        .slice(0, 2)
+    : [];
+---
+
+<Shell
+  lang={lang}
+  title={pageTitle}
+  description={post?.data.description}
+  alternate={alternate}
+  noTranslation={kind === 'article' && !alternate}
+  noindex={kind === 'notfound'}
+  image={post?.data.image}
+  article={kind === 'article'}
+>
+  {
+    kind === 'home' ? (
+      <Home lang={lang} />
+    ) : kind === 'article' && post ? (
+      <main id="main" class="shell article-shell" data-pagefind-body>
+        <header class="article-header">
+          <a class="text-link" href={pageUrl(lang, isProject ? 'projects' : isAbout ? '' : 'blog')}>
+            ← {isProject ? t.backProjects : isAbout ? t.home : t.backWriting}
+          </a>
+          <>
+            <h1 data-pagefind-meta="title">{post.data.title}</h1>
+            <p class="description" data-pagefind-meta="description">
+              {post.data.description}
+            </p>
+          </>
+          {!isAbout && (
+            <div class="meta" style="margin-top:20px">
+              <time datetime={post.data.date.toISOString().slice(0, 10)}>
+                {formatPublicationDate(post.data.date, lang)}
+              </time>
+              <span>·</span>
+              <span>
+                {readingMinutes(post)} {t.minutes}
+              </span>
+              {post.data.example && <span class="example-label">{t.example}</span>}
+            </div>
+          )}
+          {isProject && (
+            <dl class="project-facts">
+              <div>
+                <dt>{t.status}</dt>
+                <dd>{post.data.status ?? t.sampleStatus}</dd>
+              </div>
+              <div>
+                <dt>{t.role}</dt>
+                <dd>{post.data.role ?? t.sampleRole}</dd>
+              </div>
+            </dl>
+          )}
+          {post.data.tags.length > 0 && (
+            <div class="tag-row" data-pagefind-ignore>
+              {post.data.tags.map((tag) =>
+                post.collection === 'blog' ? (
+                  <a href={pageUrl(lang, `blog/tags/${groupSlug(tag)}`)}>{tag}</a>
+                ) : (
+                  <span>{tag}</span>
+                ),
+              )}
+            </div>
+          )}
+        </header>
+        <div class="article-grid">
+          <article class="prose">
+            {post.data.example && (
+              <aside class="article-example" data-pagefind-ignore>
+                <strong>{t.example}</strong> — {t.placeholder}
+              </aside>
+            )}
+            {headings.length > 0 && (
+              <details class="mobile-toc" data-pagefind-ignore>
+                <summary>{t.contents}</summary>
+                {headings.map((h) => (
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                ))}
+              </details>
+            )}
+            {Content && <Content />}
+            {post.data.links.length > 0 && (
+              <div class="intro-links">
+                {post.data.links.map((link) => (
+                  <a class="button" href={link.url}>
+                    {link.label} ↗
+                  </a>
+                ))}
+              </div>
+            )}
+            {related.length > 0 && (
+              <section class="section" data-pagefind-ignore>
+                <h2>{t.more}</h2>
+                <PostList posts={related} lang={lang} />
+              </section>
+            )}
+          </article>
+          {headings.length > 0 && (
+            <nav class="toc" aria-label={t.contents} data-pagefind-ignore>
+              <p>{t.contents}</p>
+              {headings.map((h) => (
+                <a href={`#${h.slug}`} style={h.depth === 3 ? 'padding-left:10px' : undefined}>
+                  {h.text}
+                </a>
+              ))}
+            </nav>
+          )}
+        </div>
+      </main>
+    ) : kind === 'notfound' ? (
+      <main class="shell not-found" id="main">
+        <>
+          <p class="eyebrow">404 / Sibsys</p>
+          <h1>{t.notFound}</h1>
+          <p>{t.notFoundText}</p>
+          <a class="button" href={pageUrl(lang)}>
+            {t.goHome} ↗
+          </a>
+        </>
+      </main>
+    ) : (
+      <main class="shell" id="main">
+        <header class="archive-header">
+          <>
+            <p class="eyebrow">{kind === 'projects' ? t.projectsKicker : t.writingKicker}</p>
+            <h1>{title ?? (kind === 'projects' ? t.projectsTitle : t.writingTitle)}</h1>
+            <p>{kind === 'projects' ? t.projectsDescription : t.writingDescription}</p>
+          </>
+        </header>
+        {kind === 'projects' ? (
+          <ProjectGrid projects={posts} lang={lang} />
+        ) : (
+          <div class="archive-body">
+            <nav class="group-nav" aria-label={t.topics}>
+              {[
+                ['blog', t.all],
+                ['blog/tags', t.topics],
+                ['blog/categories', t.categories],
+                ['blog/series', t.series],
+                ['blog/archives', t.archives],
+              ].map(([path, label]) => (
+                <a
+                  href={pageUrl(lang, path)}
+                  aria-current={Astro.url.pathname === pageUrl(lang, path) ? 'page' : undefined}
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+            {kind === 'groups' ? (
+              <ul class="group-list">
+                {groups.length ? (
+                  groups.map((g) => (
+                    <li>
+                      <a href={g.href}>
+                        <span>{g.name}</span>
+                        <small>
+                          {g.count} {t.notes} ↗
+                        </small>
+                      </a>
+                    </li>
+                  ))
+                ) : (
+                  <li class="empty-state">{t.emptyWriting}</li>
+                )}
+              </ul>
+            ) : (
+              <PostList posts={posts} lang={lang} />
+            )}
+            {totalPages > 1 && (
+              <nav class="pagination" aria-label={t.page}>
+                {currentPage > 1 ? (
+                  <a
+                    href={pageUrl(
+                      lang,
+                      currentPage === 2 ? 'blog' : `blog/page/${currentPage - 1}`,
+                    )}
+                  >
+                    ← {t.previous}
+                  </a>
+                ) : (
+                  <span />
+                )}
+                <span>
+                  {t.page} {currentPage} {t.of} {totalPages}
+                </span>
+                {currentPage < totalPages ? (
+                  <a href={pageUrl(lang, `blog/page/${currentPage + 1}`)}>{t.next} →</a>
+                ) : (
+                  <span />
+                )}
+              </nav>
+            )}
+          </div>
+        )}
+      </main>
+    )
+  }
+</Shell>

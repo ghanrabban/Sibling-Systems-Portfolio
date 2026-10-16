@@ -30,3 +30,11 @@ AGENTS.md
 scripts/fonts/ui-chars.txt
 public/fonts/*-subset.woff2
 public/friend-circle.json
+
+# Sibsys local credentials, release evidence and browser artifacts
+.env.*
+!.env.example
+.wrangler/
+releases/
+test-results/
+playwright-report/

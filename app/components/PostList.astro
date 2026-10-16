@@ -1,0 +1,53 @@
+---
+import {
+  formatPublicationDate,
+  publicationUrl,
+  readingMinutes,
+  type Entry,
+  type Locale,
+} from '../lib/content';
+import { ui } from '../lib/i18n';
+interface Props {
+  posts: Entry[];
+  lang: Locale;
+}
+const { posts, lang } = Astro.props;
+const t = ui(lang);
+---
+
+<div class="post-list">
+  {
+    posts.length ? (
+      posts.map((post, index) => (
+        <article class="post-row">
+          <span class="row-number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <div class="post-row-main">
+            <div class="meta">
+              <time datetime={post.data.date.toISOString().slice(0, 10)}>
+                {formatPublicationDate(post.data.date, lang)}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span>
+                {readingMinutes(post)} {t.minutes}
+              </span>
+              {post.data.example && <span class="example-label">{t.example}</span>}
+            </div>
+            <h3>
+              <a href={publicationUrl(post)}>
+                {post.data.title}
+                <span class="row-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+            </h3>
+            <p>{post.data.description}</p>
+          </div>
+        </article>
+      ))
+    ) : (
+      <p class="empty-state">{t.emptyWriting}</p>
+    )
+  }
+</div>
