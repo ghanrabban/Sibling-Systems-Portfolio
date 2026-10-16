@@ -14,7 +14,7 @@ git rev-parse HEAD
 SOURCE_COMMIT=<reviewed-commit> docker compose run --build --rm -e BUILD_DATE=2026-10-16 build
 ```
 
-Replace placeholders/date with actual release inputs. `releases/<build-id>/build-inputs.json` records the date, source label, tool versions and indexing mode. `asset-report.json` records output paths, sizes and SHA-256 hashes. Only its sibling `dist/` is uploaded. Keep an off-machine copy of accepted release folders and configuration; Git does not back up ignored artifacts.
+Replace placeholders/date with actual release inputs. `releases/<build-id>/build-inputs.json` records the date, source label, tool versions and indexing mode. `asset-report.json` records output paths, sizes and SHA-256 hashes. The matching `wrangler.jsonc` is saved alongside the reports. Only the sibling `dist/` is uploaded. Keep an off-machine copy of accepted release folders and configuration; Git does not back up ignored artifacts.
 
 The audit fails on broken internal URLs/fragments, reference identity leaks, unpublished sentinels, unexpected source files, over 20,000 assets or any file above 25 MiB. It warns at 16,000 files or 20 MiB/file. These Free limits were checked against [Cloudflare Static Assets documentation](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/); recheck before later releases. Static requests are free and unlimited under that model. Runtime code, databases, paid bindings and Workers Builds are not required here.
 

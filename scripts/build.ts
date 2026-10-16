@@ -1,4 +1,5 @@
 import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { buildDate } from '../src/lib/publication';
 import { site } from '../app/config/site';
 const day = buildDate();
@@ -26,8 +27,14 @@ await writeFile(
       buildDate: day,
       sourceCommit: process.env.SOURCE_COMMIT ?? 'working-tree',
       site: site.url,
-      node: process.versions.node,
+      node: Bun.spawnSync(['node', '-p', 'process.versions.node']).stdout.toString().trim(),
       bun: Bun.version,
+      lockSha256: createHash('sha256')
+        .update(await readFile('bun.lock'))
+        .digest('hex'),
+      wranglerConfigSha256: createHash('sha256')
+        .update(await readFile('wrangler.jsonc'))
+        .digest('hex'),
       placeholderMode: site.placeholderMode,
     },
     null,
