@@ -1,0 +1,112 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { ArrowLeft, ArrowUpRight, MapPin } from 'lucide-astro';
+import Shell from '../../../layouts/Shell.astro';
+import { counterpart, entrySlug, pageUrl, publicationUrl } from '../../../lib/content';
+import { resumes } from '../../../lib/resumes';
+import { ui } from '../../../lib/i18n';
+
+export async function getStaticPaths() {
+  const authors = await resumes();
+  return authors.map((author) => {
+    const translation = counterpart(author, authors, author.data.lang === 'en' ? 'id' : 'en');
+    return {
+      params: { lang: author.data.lang, slug: entrySlug(author) },
+      props: { author, alternate: translation ? publicationUrl(translation) : undefined },
+    };
+  });
+}
+const { author, alternate } = Astro.props as {
+  author: CollectionEntry<'resumes'>;
+  alternate?: string;
+};
+const { lang } = author.data;
+const t = ui(lang);
+const { Content, headings } = await render(author);
+const sections = headings.filter((heading) => heading.depth === 2);
+---
+
+<Shell
+  lang={lang}
+  title={`${author.data.title} · ${t.resume}`}
+  description={author.data.description}
+  alternate={alternate}
+  noTranslation={!alternate}
+  languageFallback="resume"
+>
+  <main class="shell resume-page" id="main" data-pagefind-body>
+    <a class="resume-back" href={pageUrl(lang, 'resume')} data-pagefind-ignore
+      ><ArrowLeft size={15} />{t.backResumes}</a
+    >
+    <header class="resume-hero">
+      <img
+        class="resume-portrait"
+        src={author.data.photo}
+        alt={author.data.photoAlt}
+        width="480"
+        height="480"
+      />
+      <div class="resume-identity">
+        <p class="eyebrow">Sibling Systems / {t.resume}</p>
+        <h1 data-pagefind-meta="title">{author.data.title}</h1>
+        <p class="resume-headline">{author.data.headline}</p>
+        {
+          author.data.location && (
+            <p class="resume-location">
+              <MapPin size={14} />
+              {author.data.location}
+            </p>
+          )
+        }
+        <p class="resume-summary" data-pagefind-meta="description">{author.data.description}</p>
+      </div>
+    </header>
+    {
+      author.data.example && (
+        <p class="resume-example" data-pagefind-ignore>
+          {t.resumeExample}
+        </p>
+      )
+    }
+    <div class="resume-body">
+      <div class="prose resume-prose"><Content /></div>
+      <aside class="resume-sidebar" aria-label={t.resume}>
+        {
+          sections.length > 0 && (
+            <nav aria-label={t.contents} class="resume-sections" data-pagefind-ignore>
+              <h2>{t.contents}</h2>
+              {sections.map((heading) => (
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              ))}
+            </nav>
+          )
+        }
+        {
+          author.data.skills.length > 0 && (
+            <section class="resume-skills">
+              <h2>{t.skills}</h2>
+              <ul>
+                {author.data.skills.map((skill) => (
+                  <li>{skill}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {
+          author.data.links.length > 0 && (
+            <section class="resume-links">
+              <h2>{t.profileLinks}</h2>
+              {author.data.links.map((link) => (
+                <a href={link.url}>
+                  {link.label}
+                  <ArrowUpRight size={14} />
+                </a>
+              ))}
+            </section>
+          )
+        }
+      </aside>
+    </div>
+  </main>
+</Shell>

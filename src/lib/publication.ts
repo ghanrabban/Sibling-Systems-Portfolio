@@ -69,7 +69,12 @@ export function pageUrl(language: Locale, path = ''): string {
 
 export function publicationUrl(entry: Publication): string {
   if (entry.collection === 'about') return pageUrl(entry.data.lang, 'about');
-  const section = entry.collection === 'projects' ? 'projects' : 'blog';
+  const section =
+    entry.collection === 'resumes'
+      ? 'resume'
+      : entry.collection === 'projects'
+        ? 'projects'
+        : 'blog';
   return pageUrl(entry.data.lang, `${section}/${entrySlug(entry)}`);
 }
 

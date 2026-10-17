@@ -12,6 +12,7 @@ interface Props {
   description?: string;
   alternate?: string;
   noTranslation?: boolean;
+  languageFallback?: 'blog' | 'resume';
   noindex?: boolean;
   image?: string;
   article?: boolean;
@@ -22,17 +23,19 @@ const {
   description = site[Astro.props.lang].description,
   alternate,
   noTranslation = false,
+  languageFallback = 'blog',
   noindex = false,
   image = site.socialImage,
   article = false,
 } = Astro.props;
 const t = ui(lang);
 const other = lang === 'en' ? 'id' : 'en';
+const fallbackLabel = languageFallback === 'resume' ? t.otherResumes : t.otherArchive;
 const canonical = new URL(Astro.url.pathname, site.url).href;
 const pageTitle = title ? `${title} — ${site.name}` : `${site.name} — ${site.fullName}`;
 const navigation = [
   ['', t.home],
-  ['blog', t.writing],
+  ['resume', t.resume],
   ['projects', t.projects],
   ['about', t.about],
 ];
@@ -118,10 +121,10 @@ const active = (path: string) =>
       <div class="nav-actions">
         <a
           class="language-link"
-          href={alternate ?? pageUrl(other, 'blog')}
+          href={alternate ?? pageUrl(other, languageFallback)}
           lang={other}
-          title={alternate ? t.otherLanguage : t.otherArchive}
-          aria-label={alternate ? t.otherLanguage : t.otherArchive}>{other.toUpperCase()}</a
+          title={alternate ? t.otherLanguage : fallbackLabel}
+          aria-label={alternate ? t.otherLanguage : fallbackLabel}>{other.toUpperCase()}</a
         >
         <button
           class="icon-button search-trigger js-only"
@@ -166,8 +169,8 @@ const active = (path: string) =>
       <div class="translation-notice">
         <>
           <span>{t.missing}</span>
-          <a href={pageUrl(other, 'blog')}>
-            {t.otherArchive} <ArrowUpRight size={14} />
+          <a href={pageUrl(other, languageFallback)}>
+            {fallbackLabel} <ArrowUpRight size={14} />
           </a>
         </>
       </div>

@@ -9,3 +9,5 @@ Owner's 2026-10-17 design revision: application-owned neutral grayscale tokens, 
 Docker provides edit, build/export, local Wrangler preview and browser QA targets. The final release is static assets only: no main Worker script/SSR/database. Intended origin `https://sibsys.dev`; account/domain association remains deployment-specific. EN is the root redirect; EN/ID detail URLs may differ while sharing a translation key. Placeholder mode requests noindex until the owner replaces/reviews examples.
 
 See docs for authoring, deployment, provenance, verification and outstanding acceptance.
+
+The 2026-10-17 resume revision replaces the Writing main-navigation entry with Resume. Isolated `app/pages/[lang]/resume/` routes use `app/content/resumes/`, the shared publication rules and `app/lib/resumes.ts`. Two editable author profiles are paired across EN/ID; CV content is Markdown, photos local and optional links HTTPS. Writing archives and RSS remain available. A missing CV translation falls back to the other locale's resume index. No additional runtime or dependency is needed.

@@ -105,6 +105,10 @@ test('theme persists, mobile menu closes with Escape, and narrow pages fit', asy
       '/en/blog/inside-a-small-system/',
       '/id/blog/catatan-untuk-memulai/',
       '/en/projects/',
+      '/en/resume/',
+      '/id/resume/',
+      '/en/resume/author-1/',
+      '/id/resume/author-2/',
     ]) {
       await page.goto(route);
       expect(
@@ -124,6 +128,10 @@ test('representative pages and search have no automated WCAG A/AA violations', a
       '/id/projects/proyek-berikutnya/',
       '/en/about/',
       '/id/blog/tags/',
+      '/en/resume/',
+      '/id/resume/',
+      '/en/resume/author-1/',
+      '/id/resume/author-2/',
     ]) {
       await page.goto(route);
       await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), mode);
@@ -154,18 +162,118 @@ test('core content and navigation remain usable without JavaScript', async ({ br
   const page = await context.newPage();
   await page.goto('/id/');
   await expect(page.locator('h1')).toBeVisible();
-  await page.locator('.nojs-nav a[href="/id/blog/"]').click();
+  await page.locator('.nojs-nav a[href="/id/resume/"]').click();
+  await expect(page.locator('.resume-card')).toHaveCount(2);
+  await page.locator('.resume-card').nth(1).click();
+  await expect(page.locator('h1')).toHaveText('Penulis Kedua');
+  await expect(page.locator('.resume-prose')).toBeVisible();
+  await page.locator('.resume-back').click();
+  await expect(page).toHaveURL(/\/id\/resume\/$/);
+  await page.locator('.nojs-nav a[href="/id/"]').click();
+  await page.getByRole('link', { name: 'Semua tulisan', exact: true }).first().click();
   await expect(page.locator('.post-list')).toBeVisible();
   await context.close();
+});
+
+test('both authors have separate bilingual resumes and working photo cards', async ({
+  page,
+  request,
+}) => {
+  for (const lang of ['en', 'id']) {
+    await page.goto(`/${lang}/resume/`);
+    await expect(page.locator('.desktop-nav a[aria-current="page"]')).toHaveText('Resume');
+    await expect(page.locator('.desktop-nav a[href$="/blog/"]')).toHaveCount(0);
+    await expect(page.locator('.resume-card')).toHaveCount(2);
+    for (let n = 1; n <= 2; n++) {
+      await page.goto(`/${lang}/resume/`);
+      const card = page.locator('.resume-card').nth(n - 1);
+      await expect(card).toHaveAttribute('href', `/${lang}/resume/author-${n}/`);
+      await expect(card.locator('img')).toHaveAttribute('alt', /.+/);
+      expect(
+        await card
+          .locator('img')
+          .evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0),
+      ).toBe(true);
+      await card.focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(new RegExp(`/${lang}/resume/author-${n}/$`));
+      await expect(page.locator('h1')).toHaveText(
+        lang === 'en'
+          ? n === 1
+            ? 'Author One'
+            : 'Author Two'
+          : n === 1
+            ? 'Penulis Pertama'
+            : 'Penulis Kedua',
+      );
+      await expect(page.locator('.resume-example')).toBeVisible();
+      await expect(page.locator('.resume-prose h2')).toHaveCount(5);
+      await expect(page.locator('.resume-skills li')).toHaveCount(3);
+      await expect(page.locator('.resume-links')).toHaveCount(0);
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        'href',
+        `https://sibsys.dev/${lang}/resume/author-${n}/`,
+      );
+      const other = lang === 'en' ? 'id' : 'en';
+      await expect(page.locator(`link[hreflang="${other}"]`)).toHaveAttribute(
+        'href',
+        `https://sibsys.dev/${other}/resume/author-${n}/`,
+      );
+      await page.locator('.language-link').click();
+      await expect(page).toHaveURL(new RegExp(`/${other}/resume/author-${n}/$`));
+      await page.locator('.language-link').click();
+      await page.locator('.resume-back').click();
+      await expect(page).toHaveURL(new RegExp(`/${lang}/resume/$`));
+    }
+    const missing = await request.get(`/${lang}/resume/unknown-author/`);
+    expect(missing.status()).toBe(404);
+    expect(await missing.text()).toContain(`lang="${lang}"`);
+    const rss = await request.get(`/${lang}/rss.xml`);
+    expect(await rss.text()).not.toContain('/resume/');
+  }
+  const sitemap = await request.get('/sitemap-0.xml');
+  for (const lang of ['en', 'id'])
+    for (const n of [1, 2])
+      expect(await sitemap.text()).toContain(`https://sibsys.dev/${lang}/resume/author-${n}/`);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/en/');
+  await page.locator('#menu-toggle').click();
+  await page.locator('#mobile-nav a[href="/en/resume/"]').click();
+  await expect(page.locator('.resume-card')).toHaveCount(2);
+});
+
+test('author resumes are searchable in their own language', async ({ page }) => {
+  for (const [lang, query] of [
+    ['en', 'Author'],
+    ['id', 'Penulis'],
+  ]) {
+    await page.goto(`/${lang}/resume/`);
+    await page.locator('.search-trigger').click();
+    await page.locator('#search-input').fill(query);
+    await expect(page.locator(`#search-results a[href*="/${lang}/resume/"]`)).toHaveCount(2);
+    const other = lang === 'en' ? 'id' : 'en';
+    await expect(page.locator(`#search-results a[href*="/${other}/"]`)).toHaveCount(0);
+    await page.locator(`#search-results a[href*="/${lang}/resume/"]`).first().click();
+    await expect(page.locator('.resume-hero')).toBeVisible();
+  }
 });
 
 test('capture desktop, mobile, article and dark mode for visual review', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto('/en/');
   await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
+  await page.goto('/en/resume/');
+  await page.screenshot({ path: 'test-results/resume-desktop.png', fullPage: true });
+  await page.goto('/en/resume/author-1/');
+  await page.screenshot({ path: 'test-results/resume-profile-desktop.png', fullPage: true });
   await page.goto('/id/blog/catatan-untuk-memulai/');
   await page.screenshot({ path: 'test-results/article-id.png', fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/id/resume/');
+  await page.screenshot({ path: 'test-results/resume-mobile.png', fullPage: true });
+  await page.goto('/id/resume/author-2/');
+  await page.evaluate(() => (document.documentElement.dataset.theme = 'dark'));
+  await page.screenshot({ path: 'test-results/resume-profile-dark-mobile.png', fullPage: true });
   await page.goto('/id/');
   await page.screenshot({ path: 'test-results/home-mobile.png', fullPage: true });
   await page.locator('#theme-toggle').click();

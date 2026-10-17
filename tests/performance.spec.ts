@@ -10,6 +10,8 @@ test('record three cold mobile samples per representative page', async ({ browse
     '/en/blog/a-note-to-begin-with/',
     '/id/blog/catatan-untuk-memulai/',
     '/en/projects/your-next-project/',
+    '/en/resume/',
+    '/id/resume/author-2/',
   ];
   const samples: {
     route: string;

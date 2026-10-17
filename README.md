@@ -1,6 +1,6 @@
 # Sibsys — Sibling Systems
 
-A quiet home for projects, writing, and ideas in progress. English and Bahasa Indonesia, monochrome light/charcoal dark themes and local search. Built with Astro for **https://sibsys.dev**.
+A quiet home for projects, author resumes, writing, and ideas in progress. English and Bahasa Indonesia, monochrome light/charcoal dark themes and local search. Built with Astro for **https://sibsys.dev**.
 
 This first version contains **clearly labeled placeholder content**, as requested. Search engines are asked not to index it until `placeholderMode` is turned off after editorial review. This is a publishing preference, not access control: public files and Git history remain readable.
 
@@ -30,23 +30,27 @@ The build exports an immutable release directory under `releases/`; `releases/cu
 
 ## Edit your portfolio
 
-| Change                                               | File or folder                                                   |
-| ---------------------------------------------------- | ---------------------------------------------------------------- |
-| Brand, descriptions, source URL, indexing preference | `app/config/site.ts`                                             |
-| About                                                | `app/content/about/en/about.md`, `app/content/about/id/about.md` |
-| Writing                                              | `app/content/blog/en/`, `app/content/blog/id/`                   |
-| Projects                                             | `app/content/projects/en/`, `app/content/projects/id/`           |
-| Interface translations                               | `app/lib/i18n.ts`                                                |
-| Colors and responsive layout                         | `app/styles/sibsys.css`                                          |
-| Public images                                        | `static/images/`                                                 |
+| Change                                               | File or folder                                                             |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| Brand, descriptions, source URL, indexing preference | `app/config/site.ts`                                                       |
+| About                                                | `app/content/about/en/about.md`, `app/content/about/id/about.md`           |
+| Writing                                              | `app/content/blog/en/`, `app/content/blog/id/`                             |
+| Projects                                             | `app/content/projects/en/`, `app/content/projects/id/`                     |
+| Author names, roles, CV sections, skills and links   | `app/content/resumes/en/`, `app/content/resumes/id/`                       |
+| Author photo placeholders                            | `static/images/authors/author-1.svg`, `static/images/authors/author-2.svg` |
+| Interface translations                               | `app/lib/i18n.ts`                                                          |
+| Colors and responsive layout                         | `app/styles/sibsys.css`                                                    |
+| Public images                                        | `static/images/`                                                           |
 
 Read the [author guide](docs/author-guide.md), [operations guide](docs/operations.md), and [implementation record](docs/implementation-record.md).
+
+The **Resume** navigation tab opens two author cards at `/en/resume/` and `/id/resume/`. Each opens a separate CV. Both authors use editable placeholders; replace their names, portraits and details before launch. The homepage still links to the writing archive, and existing article URLs and RSS feeds remain available.
 
 ## Architecture
 
 `app/` and `static/` are production inputs. `src/lib/publication.ts` owns eligibility and URL rules. Astro generates static HTML; Pagefind builds separate EN/ID indexes. Cloudflare Workers Static Assets serves the result without runtime Worker code, databases, paid bindings or a Docker server.
 
-Upstream Navfolio history and its MIT notice are retained. Legacy `src/` (except `src/lib/` and the Markdown plugin adapter), `public/`, old scripts and the optional `src/docs` submodule are reference material. **Edit the `app/` paths above.** A normal clone is sufficient; initializing the reference docs submodule is unnecessary. Rebuild the original reference only from audited commit `70aa71ddd9f7ee4af38fa5810b320820712f1885` in a separate checkout.
+The upstream MIT notice is retained. The owner-approved default-branch history replacement removed inherited commits; a verified local backup preserves them. Legacy `src/` (except `src/lib/` and the Markdown plugin adapter), `public/`, old scripts and the optional `src/docs` submodule are reference material. **Edit the `app/` paths above.** A normal clone is sufficient; initializing the reference docs submodule is unnecessary. Rebuild the original reference from audited upstream commit `70aa71ddd9f7ee4af38fa5810b320820712f1885` in a separate upstream checkout or the retained backup.
 
 The Docker image digest, Bun version and `bun.lock` pin build inputs. Sibsys owns its EN/ID routing and monochrome palettes; no private package forks are required.
 

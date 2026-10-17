@@ -30,6 +30,23 @@ const schema = z.object({
     .default([]),
 });
 export const collections = {
+  resumes: defineCollection({
+    loader: glob({
+      base: './app/content/resumes',
+      pattern: '**/*.md',
+      generateId: ({ entry }) => entry.replace(/\.md$/, ''),
+    }),
+    schema: schema.extend({
+      headline: z.string().min(1),
+      location: z.string().optional(),
+      photo: z
+        .string()
+        .regex(/^\/images\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:svg|webp|png|jpe?g|avif)$/),
+      photoAlt: z.string().min(1),
+      order: z.number().int().min(0).default(0),
+      skills: z.array(z.string().min(1)).default([]),
+    }),
+  }),
   blog: defineCollection({
     loader: glob({
       base: './app/content/blog',

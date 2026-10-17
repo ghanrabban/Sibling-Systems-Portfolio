@@ -1,0 +1,55 @@
+---
+import { ArrowUpRight } from 'lucide-astro';
+import Shell from '../../../layouts/Shell.astro';
+import { locales, pageUrl, publicationUrl, type Locale } from '../../../lib/content';
+import { resumes } from '../../../lib/resumes';
+import { ui } from '../../../lib/i18n';
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang }, props: { lang } }));
+}
+const { lang } = Astro.props as { lang: Locale };
+const t = ui(lang);
+const authors = await resumes(lang);
+---
+
+<Shell
+  lang={lang}
+  title={t.resume}
+  description={t.resumeDescription}
+  alternate={pageUrl(lang === 'en' ? 'id' : 'en', 'resume')}
+>
+  <main class="shell resume-index" id="main">
+    <header class="archive-header">
+      <p class="eyebrow">{t.resumeKicker}</p>
+      <h1>{t.resumeTitle}</h1>
+      <p>{t.resumeDescription}</p>
+    </header>
+    <div class="resume-cards">
+      {
+        authors.map((author, index) => (
+          <a
+            class="resume-card"
+            href={publicationUrl(author)}
+            aria-labelledby={`name-${index} link-${index}`}
+          >
+            <div class="resume-card-photo">
+              <img src={author.data.photo} alt={author.data.photoAlt} width="480" height="480" />
+            </div>
+            <div class="resume-card-copy">
+              {author.data.example && <span class="example-label">{t.example}</span>}
+              <h2 id={`name-${index}`}>{author.data.title}</h2>
+              <p class="resume-headline">{author.data.headline}</p>
+              <p class="resume-summary">{author.data.description}</p>
+              <span class="resume-card-link" id={`link-${index}`}>
+                {t.viewResume}
+                <ArrowUpRight size={17} />
+              </span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+    {authors.length === 0 && <p class="empty-state">{t.emptyResumes}</p>}
+  </main>
+</Shell>

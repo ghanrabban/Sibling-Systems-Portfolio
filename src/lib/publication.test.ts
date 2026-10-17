@@ -76,4 +76,31 @@ describe('R06–R15/R28 publication contracts', () => {
     expect(formatPublicationDate(day, 'id')).toContain('13');
     expect(formatPublicationDate(day, 'en')).toContain('13');
   });
+  test('resumes have their own URLs and eligible translation identities', () => {
+    const en = {
+      ...entry('en/author', { translationKey: 'person', slug: 'author' }),
+      collection: 'resumes',
+    };
+    const id = {
+      ...entry('id/penulis', { lang: 'id', translationKey: 'person', slug: 'penulis' }),
+      collection: 'resumes',
+    };
+    expect(publicationUrl(en)).toBe('/en/resume/author/');
+    expect(publicationUrl(counterpart(en, [en, id], 'id', '2026-10-13')!)).toBe(
+      '/id/resume/penulis/',
+    );
+    expect(
+      counterpart(en, [en, { ...id, data: { ...id.data, draft: true } }], 'id', '2026-10-13'),
+    ).toBeUndefined();
+    expect(
+      published(
+        [en, { ...id, data: { ...id.data, date: new Date('2099-01-01') } }],
+        undefined,
+        '2026-10-13',
+      ),
+    ).toEqual([en]);
+    expect(() => validatePublications([en, { ...en, id: 'another' }])).toThrow(
+      'Duplicate translation',
+    );
+  });
 });
