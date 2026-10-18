@@ -76,3 +76,17 @@ Docker verification passed: eight unit/contract tests (29 assertions), Astro che
 The seven-route performance lab passed its existing budgets with three cold samples per route. The resume index's median LCP was 444 ms and CLS 0.0140; the Indonesian CV's median LCP was 440 ms and CLS 0.0161. Initial font bytes were 150,456 and resume JavaScript 1,828 bytes. Conditions remain local Chromium/Linux arm64, 390×844, 4× CPU slowdown, 1.6 Mbps down, 750 Kbps up and 150 ms latency. Real portraits and long real CVs should be reviewed when substituted; these are placeholder-content measurements.
 
 The production build contains 51 HTML files and 15 searchable entries in two languages, with 104 uploadable assets and no generated-link audit errors. The author guide documents every profile field, image replacement, translation pairing and stable URLs. Cloudflare production deployment and domain settings remain a separate step.
+
+## Supplied Sibsys logo — 2026-10-18
+
+Replaced the header, footer and homepage profile-panel mark with the owner's supplied `logo/Sibsys.png` in light mode and `logo/Sibsys_dark-theme.png` in dark mode. The original 1500×1500 PNGs remain unchanged. A repeatable Sharp script generates transparent 256×256 lossless WebP web copies (14,842 and 13,914 bytes) and 64×64 PNG favicons (3,819 and 3,681 bytes). The other artwork supplied in `logo/` is outside this update. No new dependency was introduced.
+
+The shared logo uses fixed dimensions and responsive sizing, with the supplied orientation preserved. Adjacent brand text supplies its accessible name. Both the early theme initializer and the theme toggle update the favicon, so system preference, saved overrides, reloads and locale navigation agree with the page. Without JavaScript, the light assets match the light page. The removed placeholder favicon's old URL redirects to the new light PNG.
+
+The browser audit exposed a pre-existing transient contrast problem: resume card backgrounds animated through mid-gray while their text switched immediately between themes. The cards now change their backgrounds immediately while retaining the border hover transition. The full browser audit passed after this correction.
+
+Verified in Docker: eight unit contracts (29 assertions), Astro check with zero diagnostics, formatting, production build and generated-link/asset audit, and twelve Chromium browser scenarios. New checks cover both initial system themes, actual logo loading in all three placements, toggles, saved overrides, locale navigation, PNG favicon responses, the legacy redirect and no-JavaScript fallback. Existing search, resume, translation, hosting and responsive checks remain passing. Selected axe A/AA checks passed across ten representative pages in both themes and the search dialog. Desktop and mobile screenshots in both themes were visually inspected. These checks do not establish full manual accessibility or Safari/real-device acceptance.
+
+The build still contains 51 HTML files and 15 searchable entries, now with 107 uploadable assets. The author guide documents how to regenerate the logo assets after changing the originals.
+
+The seven-route performance lab passed with three cold mobile samples per route: median LCP ranged from 420 to 496 ms and median CLS from 0.0013 to 0.0733, within the existing 2.5-second/0.1 budgets. Conditions remain local Chromium/Linux arm64, 390×844, 4× CPU slowdown, 1.6 Mbps download, 750 Kbps upload and 150 ms latency. These are local placeholder-content results, not hosted field measurements.

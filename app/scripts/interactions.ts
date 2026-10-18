@@ -5,6 +5,8 @@ toggle?.addEventListener('click', () => {
   document.documentElement.dataset.theme = next;
   const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
   if (themeColor) themeColor.content = themeColor.dataset[next]!;
+  const favicon = document.querySelector<HTMLLinkElement>('#site-favicon');
+  if (favicon) favicon.href = favicon.dataset[next]!;
   try {
     localStorage.setItem('sibsys-theme', next);
   } catch {

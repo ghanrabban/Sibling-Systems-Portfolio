@@ -8,6 +8,18 @@
 4. Keep `placeholderMode: true` during preparation. After reviewing both languages, set it to `false`; the next build removes the site-wide noindex metadata and header. The 404 exclusions remain.
 5. Build and inspect the production preview before deploying. A deployed artifact never updates itself.
 
+## Replace the logo
+
+The original artwork is `logo/Sibsys.png` for light mode and `logo/Sibsys_dark-theme.png` for dark mode. Both have transparent backgrounds. Replace these two files, then regenerate their smaller web copies with Docker:
+
+```sh
+docker compose run --build --rm dev bun run assets:brand
+```
+
+This produces lossless 256×256 WebP logos under `static/images/brand/` and 64×64 PNG favicons under `static/`. Commit the two originals and generated copies together. Rebuild the production preview after regeneration. Other artwork in `logo/` is not published as website assets.
+
+The shared `app/components/Mark.astro` supplies the header, footer and homepage profile panel. Its light/dark versions and the favicon follow the site's theme preference, including saved choices. Without JavaScript, the light logo and favicon match the page's light theme. Logo images are decorative because adjacent text already names Sibsys.
+
 ## Write an article
 
 Add `app/content/blog/en/my-article.md`:

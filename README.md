@@ -41,6 +41,7 @@ The build exports an immutable release directory under `releases/`; `releases/cu
 | Interface translations                               | `app/lib/i18n.ts`                                                          |
 | Colors and responsive layout                         | `app/styles/sibsys.css`                                                    |
 | Public images                                        | `static/images/`                                                           |
+| Light/dark logo originals                            | `logo/Sibsys.png`, `logo/Sibsys_dark-theme.png`                            |
 
 Read the [author guide](docs/author-guide.md), [operations guide](docs/operations.md), and [implementation record](docs/implementation-record.md).
 

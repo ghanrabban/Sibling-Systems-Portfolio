@@ -16,9 +16,10 @@
     "audit:output": "bun scripts/audit.ts",
     "deploy:check": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
-    "format": "prettier --write app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
-    "format:check": "prettier --check app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
-    "test:performance": "playwright test tests/performance.spec.ts --workers=1 --output=test-results/performance"
+    "format": "prettier --write app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts scripts/generate-brand-assets.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
+    "format:check": "prettier --check app src/lib scripts/build.ts scripts/audit.ts scripts/export-release.ts scripts/verify-publication.ts scripts/generate-brand-assets.ts tests playwright.config.ts ec.config.mjs astro.config.mjs navfolio.config.ts compose.yaml wrangler.jsonc package.json tsconfig.json README.md docs",
+    "test:performance": "playwright test tests/performance.spec.ts --workers=1 --output=test-results/performance",
+    "assets:brand": "bun scripts/generate-brand-assets.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.8",

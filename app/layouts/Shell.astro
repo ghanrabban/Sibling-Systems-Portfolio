@@ -63,7 +63,15 @@ const active = (path: string) =>
         </>
       )
     }
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      id="site-favicon"
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="/favicon-light.png"
+      data-light="/favicon-light.png"
+      data-dark="/favicon-dark.png"
+    />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -98,6 +106,8 @@ const active = (path: string) =>
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
         const themeColor = document.querySelector('meta[name="theme-color"]');
         if (themeColor) themeColor.content = themeColor.dataset[dark ? 'dark' : 'light'];
+        const favicon = document.querySelector('#site-favicon');
+        if (favicon) favicon.href = favicon.dataset[dark ? 'dark' : 'light'];
         document.documentElement.classList.add('js');
       })();
     </script>
@@ -180,7 +190,7 @@ const active = (path: string) =>
   <Fragment slot="after-content">
     <footer class="site-footer" data-pagefind-ignore>
       <div>
-        <a class="footer-brand" href={pageUrl(lang)}><Mark size={24} /> Sibsys</a><p>
+        <a class="footer-brand" href={pageUrl(lang)}><Mark size={28} /> Sibsys</a><p>
           {t.colophon}
         </p>
       </div>

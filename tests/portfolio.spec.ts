@@ -119,6 +119,49 @@ test('theme persists, mobile menu closes with Escape, and narrow pages fit', asy
   }
 });
 
+for (const initial of ['light', 'dark'] as const) {
+  test(`brand images and favicon follow ${initial} system preference and saved overrides`, async ({
+    browser,
+    request,
+  }) => {
+    const context = await browser.newContext({ colorScheme: initial });
+    const page = await context.newPage();
+    const verifyBrand = async (theme: 'light' | 'dark', count: number) => {
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await expect(page.locator('#site-favicon')).toHaveAttribute('href', `/favicon-${theme}.png`);
+      const visible = page.locator('.brand-mark img:visible');
+      await expect(visible).toHaveCount(count);
+      for (const logo of await visible.all()) {
+        await expect(logo).toHaveAttribute('src', `/images/brand/sibsys-${theme}.webp`);
+        expect(
+          await logo.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 256),
+        ).toBe(true);
+      }
+    };
+    await page.goto('/en/');
+    await verifyBrand(initial, 3);
+    const opposite = initial === 'dark' ? 'light' : 'dark';
+    await page.locator('#theme-toggle').click();
+    await verifyBrand(opposite, 3);
+    await page.reload();
+    await verifyBrand(opposite, 3);
+    await page.locator('.language-link').click();
+    await expect(page).toHaveURL(/\/id\/$/);
+    await verifyBrand(opposite, 3);
+    await page.goto('/id/resume/');
+    await verifyBrand(opposite, 2);
+    await page.locator('#theme-toggle').click();
+    await verifyBrand(initial, 2);
+    const favicon = await request.get(`/favicon-${initial}.png`);
+    expect(favicon.status()).toBe(200);
+    expect(favicon.headers()['content-type']).toContain('image/png');
+    const legacy = await request.get('/favicon.svg', { maxRedirects: 0 });
+    expect(legacy.status()).toBe(301);
+    expect(legacy.headers().location).toBe('/favicon-light.png');
+    await context.close();
+  });
+}
+
 test('representative pages and search have no automated WCAG A/AA violations', async ({ page }) => {
   for (const mode of ['light', 'dark']) {
     for (const route of [
@@ -157,11 +200,16 @@ test('representative pages and search have no automated WCAG A/AA violations', a
 test('core content and navigation remain usable without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
+    colorScheme: 'dark',
     viewport: { width: 390, height: 844 },
   });
   const page = await context.newPage();
   await page.goto('/id/');
   await expect(page.locator('h1')).toBeVisible();
+  // Without scripting the page retains its light theme, even on a dark OS.
+  await expect(page.locator('.brand-mark-light:visible')).toHaveCount(3);
+  await expect(page.locator('.brand-mark-dark:visible')).toHaveCount(0);
+  await expect(page.locator('#site-favicon')).toHaveAttribute('href', '/favicon-light.png');
   await page.locator('.nojs-nav a[href="/id/resume/"]').click();
   await expect(page.locator('.resume-card')).toHaveCount(2);
   await page.locator('.resume-card').nth(1).click();
@@ -262,6 +310,9 @@ test('capture desktop, mobile, article and dark mode for visual review', async (
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto('/en/');
   await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
+  await page.locator('#theme-toggle').click();
+  await page.screenshot({ path: 'test-results/home-desktop-dark.png', fullPage: true });
+  await page.locator('#theme-toggle').click();
   await page.goto('/en/resume/');
   await page.screenshot({ path: 'test-results/resume-desktop.png', fullPage: true });
   await page.goto('/en/resume/author-1/');
